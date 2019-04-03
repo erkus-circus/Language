@@ -14,7 +14,18 @@ void Node::add(Node node)
 }
 
 void Node::printOut(){} // TODO
-Node parse(LexList lex)
+Node parse(LexList lex, string name)
 {
+	Node node(name);
 
+	lex.stepDown();
+
+	while (lex.getType() != "EOF") // while reader is not at End of FILE
+	{
+		lex.stepUp();
+		if (lex.getType() == "STATEMENT")
+		{
+			// statement vals
+		}
+	}
 }

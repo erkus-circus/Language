@@ -17,4 +17,4 @@ private:
 	std::string val;
 };
 
-Node parse(std::string str);
+Node parse(LexList lex, std::string name = "program");
