@@ -8,7 +8,7 @@ class Node
 {
 public:
 	Node(std::string name, std::string val = "");
-	void add(Node);
+	void add(Node);//comment
 	void printOut();
 
 private:
