@@ -1,31 +1,144 @@
 #include <iostream>
+#include <vector>
 #include "AST.h"
 #include "Lexer.h"
 
 using namespace std;
 
-
-Node::Node(string name, string val)
-	:name(name), val(val) {}
-
-void Node::add(Node node)
+void Node::printOut()
 {
-	this->children.push_back(node);
+	print();
+	for (int i = 0; i < children.size(); i++)
+	{
+		children[i]->printOut();
+	}
 }
 
-void Node::printOut(){} // TODO
-Node parse(LexList lex, string name)
+Node::~Node(){}
+
+void ArgNode::print(){}
+void ExecNode::print(){}
+void CallNode::print()
 {
-	Node node(name);
+	cout << "NAME: " << name << endl;
+	args.printOut();
+	body.printOut();
+}
+void StringNode::print()
+{
+	cout << "STRING: " << val << endl;
+}
 
-	lex.stepDown();
+CallNode* parse(LexList* lex, string name)
+{
 
-	while (lex.getType() != "EOF") // while reader is not at End of FILE
+	CallNode* node{};
+
+	while (lex->getType() != "EOF") //reader is not at End of FILE
 	{
-		lex.stepUp();
-		if (lex.getType() == "STATEMENT")
+		lex->stepUp();
+		if (!lex->canRetrieve() && lex->getType() == "EOF")
 		{
-			// statement vals
+			break;
+		}
+		lex->skipSpace();
+
+		if (lex->getType() == "STATEMENT")
+		{
+			string sval = lex->getVal();
+			lex->stepUp();
+			if (lex->getVal() == ":")
+			{
+				node->children.push_back(parseCall(lex));
+			}
 		}
 	}
+	return node;
+}
+
+CallNode* parseCall(LexList* lex)
+{
+	CallNode* node{};
+	lex->stepDown();
+
+	bool gotName = 0;
+	bool gotArgs = 0;
+	while (lex->canRetrieve())
+	{
+		lex->stepUp();
+		lex->skipSpace();
+		if (!gotName)
+		{
+			while (!gotName)
+			{
+				if (lex->getType() == "SPACE")
+				{
+					gotName = 1;
+				}
+				else
+				{
+					node->name += lex->getVal();
+				}
+			}
+		}
+
+		if (!gotArgs)
+		{
+			node->children.push_back(parseArgs(lex));
+		}
+	}
+	return node;
+}
+
+
+StringNode *parseString(LexList* lex)
+{
+	StringNode* node{};
+	bool esc = 0;
+	while (lex->canRetrieve())
+	{
+		lex->stepUp();
+		if (!lex->canRetrieve() && lex->getType() == "EOF")
+		{
+			break;
+		}
+		if (!esc && lex->getVal() == "\\")
+		{
+			esc = 1;
+			continue;
+		}
+		else if (esc)
+		{
+			esc = 0;
+			node->val += lex->getVal();
+			continue;
+		}
+		if (lex->getType() == "STRSEP")
+		{
+			break;
+		}
+		node->val += lex->getVal();
+	}
+	cout << node->val;
+	return node;
+}
+
+
+ArgNode* parseArgs(LexList* lex, char sep, char end)
+{
+	ArgNode* node{};
+	while (lex->canRetrieve())
+	{
+		lex->stepUp();
+		if (!lex->canRetrieve() && lex->getType() == "EOF")
+		{
+			break;
+		}
+		if (lex->getType() == "STRSEP")
+		{
+			lex->stepDown();
+			node->children.push_back(parseString(lex));
+		}
+	}
+	return node;
 }

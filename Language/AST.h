@@ -7,14 +7,43 @@
 class Node
 {
 public:
-	Node(std::string name, std::string val = "");
-	void add(Node);//comment
+	std::vector<Node *> children;
 	void printOut();
-
-private:
-	std::vector<Node> children;
-	std::string name;
-	std::string val;
+	virtual void print() = 0;
+	virtual ~Node();
 };
 
-Node parse(LexList lex, std::string name = "program");
+class ArgNode  : public Node {
+public:
+	void print();
+};
+
+class ExecNode : public Node
+{
+public:
+	void print();
+};
+
+class CallNode : public Node
+{
+public:
+	void print();
+	std::string name = "";
+	ArgNode args;
+	ExecNode body;
+};
+
+class StringNode : public Node
+{
+public:
+	std::string val = "";
+	void print();
+};
+
+CallNode* parse(LexList* lex, std::string name = "program");
+
+CallNode *parseCall(LexList* lex);
+
+ArgNode *parseArgs(LexList* lex, char sep=',', char end=';');
+
+StringNode* parseString(LexList* lex);

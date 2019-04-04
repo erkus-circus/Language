@@ -25,21 +25,22 @@ bool Type::isStackable()
 	return stackable;
 }
 
-const int typeSize = 12;
+const int typeSize = 13;
 
 Type types[typeSize] = {
 	Type("EQUAL", "="),
 	Type("ID", "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz", 1),
 	Type("STRSEP", "\"`'"),
 	Type("NUM", "1234567890", 1),
-	Type("WHITESPACE", " \n", 1),
+	Type("SPACE", " \n", 1),
 	Type("QMARK", "?"),
 	Type("EXPOINT", "!"),
 	Type("PARENTH", "()"),
 	Type("CURLY_PAREN", "{}"),
 	Type("BRACKET", "[]"),
 	Type("OPERATOR", "/*+-"),
-	Type("DOT", ".")
+	Type("DOT", "."),
+	Type("BSLASH","\\")
 };
 
 const int statementsLen = 5;
@@ -73,12 +74,14 @@ void LexList::add(string type, string val)
 
 string LexList::getType()
 {
-	return types[index];
+	// make sure to check if not EOF before returning
+	return canRetrieve() ? types[index] : "EOF";
 }
 
 string LexList::getVal()
 {
-	return vals[index];
+	// make sure to check if not EOF before returning
+	return canRetrieve() ? vals[index] : "EOF";
 }
 
 void LexList::stepUp(int steps)
@@ -89,6 +92,18 @@ void LexList::stepUp(int steps)
 void LexList::stepDown(int steps)
 {
 	index -= steps;
+}
+void LexList::skipSpace()
+{
+	if (this->getType() == "SPACE")
+	{
+		this->stepUp();
+	}
+}
+
+bool LexList::canRetrieve()
+{
+	return index < types.size() && index < vals.size();
 }
 
 void LexList::printOut()

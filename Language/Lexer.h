@@ -23,7 +23,9 @@ public:
 	std::string getVal();
 	void stepUp(int steps = 1);
 	void stepDown(int steps = 1);
+	void skipSpace();
 	void printOut();
+	bool canRetrieve();
 private:
 	int index = 0;
 	int length = 0;

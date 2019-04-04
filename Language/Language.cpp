@@ -16,7 +16,10 @@ int main()
 		cout << ":>";
 		getline(cin, a);
 
-		lex(a).printOut();
-		cout << endl;
+		LexList l = lex(a);
+
+		l.printOut();
+
+		//parse(&l)->printOut();
 	}
 }
