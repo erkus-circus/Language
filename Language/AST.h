@@ -3,47 +3,15 @@
 #include <iostream>
 #include <vector>
 #include "Lexer.h"
+#include "json.hpp"
 
-class Node
-{
-public:
-	std::vector<Node *> children;
-	void printOut();
-	virtual void print() = 0;
-	virtual ~Node();
-};
 
-class ArgNode  : public Node {
-public:
-	void print();
-};
+nlohmann::json parse(LexList* lex, std::string name = "program");
 
-class ExecNode : public Node
-{
-public:
-	void print();
-};
+nlohmann::json parseCall(LexList* lex);
 
-class CallNode : public Node
-{
-public:
-	void print();
-	std::string name = "";
-	ArgNode args;
-	ExecNode body;
-};
+nlohmann::json parseArgs(LexList* lex, std::string sep = ",", std::string end = ";");
 
-class StringNode : public Node
-{
-public:
-	std::string val = "";
-	void print();
-};
+nlohmann::json parseString(LexList* lex);
 
-CallNode* parse(LexList* lex, std::string name = "program");
-
-CallNode *parseCall(LexList* lex);
-
-ArgNode *parseArgs(LexList* lex, char sep=',', char end=';');
-
-StringNode* parseString(LexList* lex);
+nlohmann::json node(std::string name);

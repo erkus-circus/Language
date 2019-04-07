@@ -25,6 +25,8 @@ public:
 	void stepDown(int steps = 1);
 	void skipSpace();
 	void printOut();
+	int getIndex();
+	int getLength();
 	bool canRetrieve();
 private:
 	int index = 0;

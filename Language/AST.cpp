@@ -2,41 +2,23 @@
 #include <vector>
 #include "AST.h"
 #include "Lexer.h"
+#include "json.hpp"
 
 using namespace std;
+using json = nlohmann::json;
 
-void Node::printOut()
+json node(string name)
 {
-	print();
-	for (int i = 0; i < children.size(); i++)
+	string a = "{\"Anode_name\":\"" + name + "\",\"children\":[]}";
+	return json::parse(a);
+}
+
+json parse(LexList* lex, string name)
+{
+	json n = node(name);
+
+	while (lex->getType() != "EOF" || lex->canRetrieve()) //reader is not at End of FILE
 	{
-		children[i]->printOut();
-	}
-}
-
-Node::~Node(){}
-
-void ArgNode::print(){}
-void ExecNode::print(){}
-void CallNode::print()
-{
-	cout << "NAME: " << name << endl;
-	args.printOut();
-	body.printOut();
-}
-void StringNode::print()
-{
-	cout << "STRING: " << val << endl;
-}
-
-CallNode* parse(LexList* lex, string name)
-{
-
-	CallNode* node{};
-
-	while (lex->getType() != "EOF") //reader is not at End of FILE
-	{
-		lex->stepUp();
 		if (!lex->canRetrieve() && lex->getType() == "EOF")
 		{
 			break;
@@ -49,56 +31,63 @@ CallNode* parse(LexList* lex, string name)
 			lex->stepUp();
 			if (lex->getVal() == ":")
 			{
-				node->children.push_back(parseCall(lex));
+				if (sval == "call")
+				{
+					cout << "parsing call." << endl;
+					n["children"].push_back(parseCall(lex));
+				}
 			}
 		}
+		else
+		{
+			cout << "nope: " << lex->getVal() << endl;
+		}
+		lex->stepUp();
 	}
-	return node;
+	return n;
 }
 
-CallNode* parseCall(LexList* lex)
+json parseCall(LexList* lex)
 {
-	CallNode* node{};
-	lex->stepDown();
+	json n = node("call");
+	//lex->stepDown();
 
 	bool gotName = 0;
 	bool gotArgs = 0;
-	while (lex->canRetrieve())
+	while (lex->canRetrieve() || !gotArgs)
 	{
 		lex->stepUp();
 		lex->skipSpace();
-		if (!gotName)
+		cout << "tokenVal: " << lex->getVal() << endl;
+		while (!gotName)
 		{
-			while (!gotName)
+			if (lex->getType() == "SPACE" || lex->getVal() == ",")
 			{
-				if (lex->getType() == "SPACE")
-				{
-					gotName = 1;
-				}
-				else
-				{
-					node->name += lex->getVal();
-				}
+				gotName = 1;
 			}
+			else
+			{
+				n["name"] = lex->getVal();
+			}
+			lex->stepUp(); 
 		}
 
-		if (!gotArgs)
+		if (!gotArgs && gotName)
 		{
-			node->children.push_back(parseArgs(lex));
+			cout << "parsing args and tval: " << lex->getVal() << endl; 
+			n["children"] += parseArgs(lex);
+			gotArgs = 1;
 		}
 	}
-	return node;
+	return n;
 }
-
-
-StringNode *parseString(LexList* lex)
+json parseString(LexList* lex)
 {
-	StringNode* node{};
+	json n = node("string");
 	bool esc = 0;
 	while (lex->canRetrieve())
 	{
-		lex->stepUp();
-		if (!lex->canRetrieve() && lex->getType() == "EOF")
+		if (!lex->canRetrieve() || lex->getType() == "EOF")
 		{
 			break;
 		}
@@ -110,35 +99,42 @@ StringNode *parseString(LexList* lex)
 		else if (esc)
 		{
 			esc = 0;
-			node->val += lex->getVal();
+			n["value"] += lex->getVal();
 			continue;
 		}
-		if (lex->getType() == "STRSEP")
+		else if (lex->getType() == "STRSEP")
 		{
+			cout << "breaking" << endl;
 			break;
 		}
-		node->val += lex->getVal();
+		else
+		{
+			cout << "adding char: " << lex->getVal() << endl;
+			n["value"] += lex->getVal();
+		}
+		lex->stepUp();
 	}
-	cout << node->val;
-	return node;
+	return n;
 }
 
 
-ArgNode* parseArgs(LexList* lex, char sep, char end)
+json parseArgs(LexList* lex, string sep, string end)
 {
-	ArgNode* node{};
-	while (lex->canRetrieve())
+	json n =  node("arg");
+	while (lex->canRetrieve() && lex->getVal() != end)
 	{
-		lex->stepUp();
-		if (!lex->canRetrieve() && lex->getType() == "EOF")
+		lex->skipSpace();
+		if ((!lex->canRetrieve() && lex->getType() == "EOF") || lex->getVal() == end)
 		{
 			break;
 		}
-		if (lex->getType() == "STRSEP")
+		else if (lex->getType() == "STRSEP")
 		{
 			lex->stepDown();
-			node->children.push_back(parseString(lex));
+			cout << "getting string" << endl;
+			n["children"] += parseString(lex);
 		}
+		lex->stepUp();
 	}
-	return node;
+	return n;
 }

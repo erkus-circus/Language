@@ -25,7 +25,7 @@ bool Type::isStackable()
 	return stackable;
 }
 
-const int typeSize = 13;
+const int typeSize = 14;
 
 Type types[typeSize] = {
 	Type("EQUAL", "="),
@@ -40,7 +40,8 @@ Type types[typeSize] = {
 	Type("BRACKET", "[]"),
 	Type("OPERATOR", "/*+-"),
 	Type("DOT", "."),
-	Type("BSLASH","\\")
+	Type("BSLASH","\\"),
+	Type("SEMICOL",";")
 };
 
 const int statementsLen = 5;
@@ -95,6 +96,7 @@ void LexList::stepDown(int steps)
 }
 void LexList::skipSpace()
 {
+	if (!this->canRetrieve() || this->getType() == "EOF") return;
 	if (this->getType() == "SPACE")
 	{
 		this->stepUp();
@@ -104,6 +106,16 @@ void LexList::skipSpace()
 bool LexList::canRetrieve()
 {
 	return index < types.size() && index < vals.size();
+}
+
+int LexList::getIndex()
+{
+	return index;
+}
+
+int LexList::getLength()
+{
+	return length;
 }
 
 void LexList::printOut()
@@ -158,7 +170,7 @@ LexList lex(string text, int linenum)
 				first = 1;
 			}
 
-			    lastType = type;
+			lastType = type;
 			lastVal = string(1, c);
 		}
 	}
