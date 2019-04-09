@@ -1,3 +1,5 @@
+//COMMENT LOL IF SYNC TRY THEN PULL TRY THEN FETCH THEN LOLOLOLOL
+
 #include <iostream>
 #include <vector>
 #include "AST.h"
