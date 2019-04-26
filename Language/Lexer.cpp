@@ -26,9 +26,8 @@ bool Type::isStackable()
 }
 
 const int typeSize = 14;
-
 Type types[typeSize] = {
-	Type("EQUAL", "="),
+	Type("EQUAL", "=",1),
 	Type("ID", "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz", 1),
 	Type("STRSEP", "\"`'"),
 	Type("NUM", "1234567890", 1),
@@ -105,7 +104,7 @@ void LexList::skipSpace()
 
 bool LexList::canRetrieve()
 {
-	return index < types.size() && index < vals.size();
+	return index < length;
 }
 
 int LexList::getIndex()
@@ -124,6 +123,11 @@ void LexList::printOut()
 	{
 		cout << vals[i] << ": " << types[i] << endl;
 	}
+}
+
+bool LexList::eof()
+{
+	return getType() == "EOF";
 }
 
 LexList lex(string text, int linenum)

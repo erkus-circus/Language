@@ -1,5 +1,5 @@
 #pragma once
-
+#include <iostream>
 #include <string>
 #include <map>
 #include <vector>
@@ -28,6 +28,7 @@ public:
 	int getIndex();
 	int getLength();
 	bool canRetrieve();
+	bool eof();
 private:
 	int index = 0;
 	int length = 0;

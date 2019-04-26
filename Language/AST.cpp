@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include <sstream>
 #include "AST.h"
 #include "Lexer.h"
 #include "json.hpp"
@@ -33,14 +34,13 @@ json parse(LexList* lex, string name)
 			{
 				if (sval == "call")
 				{
-					cout << "parsing call." << endl;
 					n["children"].push_back(parseCall(lex));
 				}
+				else if (sval == "if")
+				{
+					n["children"].push_back(parseIf(lex));
+				}
 			}
-		}
-		else
-		{
-			cout << "nope: " << lex->getVal() << endl;
 		}
 		lex->stepUp();
 	}
@@ -58,7 +58,6 @@ json parseCall(LexList* lex)
 	{
 		lex->stepUp();
 		lex->skipSpace();
-		cout << "tokenVal: " << lex->getVal() << endl;
 		while (!gotName)
 		{
 			if (lex->getType() == "SPACE" || lex->getVal() == ",")
@@ -69,14 +68,14 @@ json parseCall(LexList* lex)
 			{
 				n["name"] = lex->getVal();
 			}
-			lex->stepUp(); 
+			lex->stepUp();
 		}
 
 		if (!gotArgs && gotName)
 		{
-			cout << "parsing args and tval: " << lex->getVal() << endl; 
 			n["children"] += parseArgs(lex);
 			gotArgs = 1;
+			break;
 		}
 	}
 	return n;
@@ -85,35 +84,34 @@ json parseString(LexList* lex)
 {
 	json n = node("string");
 	bool esc = 0;
+	string val = "";
 	while (lex->canRetrieve())
 	{
-		if (!lex->canRetrieve() || lex->getType() == "EOF")
-		{
-			break;
-		}
 		if (!esc && lex->getVal() == "\\")
 		{
 			esc = 1;
+			lex->stepUp();
 			continue;
 		}
 		else if (esc)
 		{
 			esc = 0;
-			n["value"] += lex->getVal();
+			val += lex->getVal();
+			lex->stepUp();
 			continue;
 		}
-		else if (lex->getType() == "STRSEP")
+		else if (lex->getType() == "STRSEP" && !esc)
 		{
-			cout << "breaking" << endl;
 			break;
 		}
 		else
 		{
-			cout << "adding char: " << lex->getVal() << endl;
-			n["value"] += lex->getVal();
+			val += lex->getVal();
+			cout << val << endl;
 		}
 		lex->stepUp();
 	}
+	n["value"] = val;
 	return n;
 }
 
@@ -130,11 +128,68 @@ json parseArgs(LexList* lex, string sep, string end)
 		}
 		else if (lex->getType() == "STRSEP")
 		{
-			lex->stepDown();
-			cout << "getting string" << endl;
+			lex->stepUp();
 			n["children"] += parseString(lex);
+		}
+		else if (lex->getType() == "NUM" || lex->getType() == "DOT")
+		{
+			n["children"] += parseNum(lex);
+		}
+		else if (lex->getType() == "ID")
+		{
+			string js = "{\"ID\":\"" + lex->getVal() + "\"}";
+			n["children"] += json::parse(js);
 		}
 		lex->stepUp();
 	}
+	return n;
+}
+
+json parseNum(LexList* lex)
+{
+	json n = node("num");
+	bool dotted = 0;
+	string num;
+	while (lex->canRetrieve() || !lex->eof())
+	{
+		if (lex->getVal() == "." && !dotted)
+		{
+			dotted = true;
+			num += ".";
+		}
+		else if (lex->getVal() == ".")
+		{
+			cout << "double dot. unexpected ." << endl;
+		}
+		else if (lex->getType() == "NUM")
+		{
+			num += lex->getVal();
+		}
+		else
+		{
+			break;
+		}
+		lex->stepUp();
+	}
+	if (dotted)
+	{
+		float i;
+		stringstream ab(num);
+		ab >> i;
+		return i;
+	}
+	else
+	{
+		int i;
+		stringstream ab(num);
+		ab >> i;
+		return i;
+	}
+}
+
+json parseIf(LexList* lex)
+{
+	json n = node("if");
+	string left, right, oper;
 	return n;
 }
