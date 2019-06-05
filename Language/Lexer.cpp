@@ -25,7 +25,7 @@ bool Type::isStackable()
 	return stackable;
 }
 
-const int typeSize = 14;
+const int typeSize = 15;
 Type types[typeSize] = {
 	Type("EQUAL", "=",1),
 	Type("ID", "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz", 1),
@@ -39,6 +39,7 @@ Type types[typeSize] = {
 	Type("BRACKET", "[]"),
 	Type("OPERATOR", "/*+-"),
 	Type("DOT", "."),
+	Type("USCORE","_"),
 	Type("BSLASH","\\"),
 	Type("SEMICOL",";")
 };

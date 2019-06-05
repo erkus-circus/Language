@@ -163,6 +163,9 @@
     <ClInclude Include="CodeGenerator.h" />
     <ClInclude Include="Lexer.h" />
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="out.txt" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

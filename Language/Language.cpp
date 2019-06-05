@@ -1,8 +1,10 @@
 #include <iostream>
 #include <iomanip>
 #include <fstream>
+
 #include "Lexer.h"
 #include "AST.h"
+#include "CodeGenerator.h"
 
 #include "json.hpp"
 
@@ -11,22 +13,33 @@ using json = nlohmann::json;
 
 int main()
 {
-	cout << "Lexer & AST Generator [V0.2.1] \nEric Diskin 2019" << endl;
-	cout << "so far what you can do is run a line like: " << endl;
-	cout << "call: ANYNAMETHATISNOTNUMBERS, ARGS_LIKESTRING_OR_NUMBERS;" << endl;
-	cout << "call: print, 'lol this is a string and you can use backlash', 12, \" twelve is a number\";";
-	cout << "the first thing u see is a list of tokens. the JSON is the Abstract Syntax\
- Tree. type ~ into the command prompt to close." << endl;
+	cout << "Language [V0.3.0] \nEric Diskin 2019" << endl;
 
 	string a = "";
+	string all = "";
+	json ab;
 	while (a != "~")
 	{
 		cout << ">>>";
 		getline(cin, a);
-		LexList lexed = lex(a);
+		string lchar = { a.back() };
+		if (a == "1")
+		{
+			all = "";
+			continue;
+		}
+		if (lchar == "\\")
+		{
+			a.pop_back();
+			all += "\n" + a;
+			continue;
+		}
+		all += "\n" + a;
+		
+		LexList lexed = lex(all);
 		lexed.printOut();
 
-		json ast = parse(&lexed);
+		json ast = parse(lexed);
 
 		cout << std::setw(4) << ast << endl;
 	}

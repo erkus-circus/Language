@@ -4,17 +4,22 @@
 #include "Lexer.h"
 #include "json.hpp"
 
+using json = nlohmann::json;
 
-nlohmann::json parse(LexList* lex, std::string name = "program");
+json parse(LexList& lex, std::string name = "program", std::string end = "");
 
-nlohmann::json parseCall(LexList* lex);
+json parseCall(LexList& lex);
 
-nlohmann::json parseArgs(LexList* lex, std::string sep = ",", std::string end = ";");
+json parseArgs(LexList& lex, std::string sep = ",", std::string end = ";");
 
-nlohmann::json parseString(LexList* lex);
+json parseString(LexList& lex);
 
-nlohmann::json parseNum(LexList* lex);
+json parseNum(LexList& lex);
 
-nlohmann::json parseIf(LexList* lex);
+json parseIf(LexList& lex);
 
-nlohmann::json node(std::string name);
+json parseFunction(LexList& lex);
+
+json parseVarDec(LexList& lex); // parse variable declaration
+
+json node(std::string name);

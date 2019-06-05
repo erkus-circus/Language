@@ -7,11 +7,4 @@
 
 using json = nlohmann::json;
 
-class CodeGenerator
-{
-public:
-	CodeGenerator(json node);
-private:
-	std::string call(json node);
-};
-
+std::string compile(json js);
