@@ -7,13 +7,14 @@
 #include "CodeGenerator.h"
 
 #include "json.hpp"
-
+// var: name@type = (ID|STR|INT);
 using namespace std;
 using json = nlohmann::json;
 
 int main()
 {
-	cout << "Language [V0.3.0] \nEric Diskin 2019" << endl;
+	cout << "Language [V0.4.1] \nEric Diskin 2019" << endl;
+	// TODO: make ifs
 
 	string a = "";
 	string all = "";
@@ -37,7 +38,7 @@ int main()
 		all += "\n" + a;
 		
 		LexList lexed = lex(all);
-		lexed.printOut();
+		//lexed.printOut();
 
 		json ast = parse(lexed);
 

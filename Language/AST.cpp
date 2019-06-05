@@ -48,6 +48,10 @@ json parse(LexList& lex, string name,string end)
 					n["children"].push_back(parseFunction(lex));
 
 				}
+				else if (sval == "var")
+				{
+					n["children"].push_back(parseVarDec(lex));
+				}
 			}
 		}
 		lex.stepUp();
@@ -116,7 +120,8 @@ json parseString(LexList& lex)
 		else
 		{
 			val += lex.getVal();
-			cout << val << endl;
+			//var: EricsFriends @array = "Me", "Myself", "I", "No one else.";
+			//cout << val << endl;
 		}
 		lex.stepUp();
 	}
@@ -210,27 +215,44 @@ json parseIf(LexList& lex)
 json parseVarDec(LexList& lex)
 {
 	string varName;
-	bool gotName = 0;
-	string type;
+	bool gotName = 0, gettingType = 0, gotType = 0, gotEqual = 0;
+	string type = "";
 	json n = node("var_declaration");
 
 	while (lex.canRetrieve() && !lex.eof())
 	{
 		lex.skipSpace();
-
 		if (lex.getType() == "ID" && !gotName)
 		{
 			varName += lex.getVal();
 			gotName = 1;
 		}
-		if (gotName)
+		if (gotName && lex.getVal() == "@")
 		{
-			type = "NUM";
+			gettingType = 1;
+		}
+		if (gettingType && !gotType && lex.getType() == "ID")
+		{
+			type += lex.getVal();
+			gotType = 1;
+		}
+		if (gotType && !gotEqual && lex.getVal() == "=")
+		{
+			gotEqual = 1;
+		}
+		if (gotEqual)
+		{
+			// getting arguments also parses type for us. when compiling, an error will occur if more than one value is provided
+
+			n["children"] += parseArgs(lex);
 			break;
 		}
 
 		lex.stepUp();
 	}
+
+	n["name"] = varName;
+	n["type"] = type;
 
 	return n;
 }
