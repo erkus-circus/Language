@@ -1,3 +1,5 @@
+//COMMENT LOL IF SYNC TRY THEN PULL TRY THEN FETCH THEN LOLOLOLOL
+
 #include <iostream>
 #include <vector>
 #include <sstream>
@@ -287,5 +289,4 @@ json parseFunction(LexList& lex)
 		lex.stepUp();
 	}
 	return n;
-
 }
