@@ -49,10 +49,10 @@ const int statementsLen = 5;
 
 string statements[statementsLen] = {
 	"func",
-	"expr",
 	"call",
 	"var",
-	"if"
+	"if", //TODO
+	"return"
 };
 
 Type getCharType(string ch)

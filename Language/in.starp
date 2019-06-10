@@ -1,0 +1,6 @@
+func: main@int {
+	call: cmd, "COLOR 1c";
+	call: print, "Hello World!";
+	call: print, "The answer to life, the universe and everything is 42.";
+	call: cmd, "PAUSE";
+}

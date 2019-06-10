@@ -27,7 +27,7 @@
     <ClCompile Include="ActionTree.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="CodeGenerator.cpp">
+    <ClCompile Include="out.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -41,11 +41,19 @@
     <ClInclude Include="ActionTree.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="CodeGenerator.h">
+    <ClInclude Include="resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="out.txt" />
+    <ResourceCompile Include="Language.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Xml Include="docs.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="in.starp" />
   </ItemGroup>
 </Project>

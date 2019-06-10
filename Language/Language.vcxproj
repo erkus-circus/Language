@@ -153,18 +153,29 @@
   <ItemGroup>
     <ClCompile Include="ActionTree.cpp" />
     <ClCompile Include="AST.cpp" />
-    <ClCompile Include="CodeGenerator.cpp" />
     <ClCompile Include="Language.cpp" />
     <ClCompile Include="Lexer.cpp" />
+    <ClCompile Include="out.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ActionTree.h" />
+    <ClInclude Include="ActionTree.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">out.cpp</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="AST.h" />
-    <ClInclude Include="CodeGenerator.h" />
     <ClInclude Include="Lexer.h" />
+    <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
-    <Text Include="out.txt" />
+    <Text Include="in.starp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Language.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Xml Include="docs.xml" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

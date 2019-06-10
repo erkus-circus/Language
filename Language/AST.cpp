@@ -3,17 +3,22 @@
 #include <iostream>
 #include <vector>
 #include <sstream>
+
+#include <iomanip>
 #include "AST.h"
 #include "Lexer.h"
 #include "json.hpp"
 
+#define NN "_node_name"
 using namespace std;
 using json = nlohmann::json;
 
 json node(string name)
 {
-	string a = "{\"_node_name\":\"" + name + "\",\"children\":[]}";
-	return json::parse(a);
+	json b;
+	b[NN] = name;
+	b["children"] = json::array();
+	return b;
 }
 
 json parse(LexList& lex, string name,string end)
@@ -48,16 +53,28 @@ json parse(LexList& lex, string name,string end)
 				else if (sval == "func")
 				{
 					n["children"].push_back(parseFunction(lex));
-
 				}
 				else if (sval == "var")
 				{
 					n["children"].push_back(parseVarDec(lex));
 				}
+				else if (sval == "return")
+				{
+					n["children"].push_back(parseReturn(lex));
+				}
 			}
 		}
 		lex.stepUp();
 	}
+	return n;
+}
+
+json parseReturn(LexList& lex)
+{
+	json n = node("return");
+
+	n["value"] = parseArgs(lex);
+
 	return n;
 }
 
@@ -70,11 +87,14 @@ json parseCall(LexList& lex)
 	bool gotArgs = 0;
 	while (lex.canRetrieve() || !gotArgs)
 	{
+
+		stringstream a;
 		lex.stepUp();
 		lex.skipSpace();
 		while (!gotName)
 		{
-			if (lex.getType() == "SPACE" || lex.getVal() == ",")
+			a << n;
+			if (lex.getType() == "SPACE" || lex.getVal() == ";" || lex.getVal() == ",")
 			{
 				gotName = 1;
 			}
@@ -84,10 +104,14 @@ json parseCall(LexList& lex)
 			}
 			lex.stepUp();
 		}
+		if (lex.getVal() == ";")
+		{
+			break;
+		}
 
 		if (!gotArgs && gotName)
 		{
-			n["children"] += parseArgs(lex);
+			n["children"] = parseArgs(lex);
 			gotArgs = 1;
 			break;
 		}
@@ -99,7 +123,7 @@ json parseString(LexList& lex)
 {
 	json n = node("string");
 	bool esc = 0;
-	string val = "";
+	string val = "\"";
 	while (lex.canRetrieve())
 	{
 		if (!esc && lex.getVal() == "\\")
@@ -127,7 +151,7 @@ json parseString(LexList& lex)
 		}
 		lex.stepUp();
 	}
-	n["value"] = val;
+	n["value"] = val + "\"";
 	return n;
 }
 
@@ -135,10 +159,16 @@ json parseString(LexList& lex)
 json parseArgs(LexList& lex, string sep, string end)
 {
 	json n =  node("arg");
+
 	while (lex.canRetrieve() && lex.getVal() != end)
 	{
 		lex.skipSpace();
-		if ((!lex.canRetrieve() && lex.getType() == "EOF") || lex.getVal() == end)
+
+		if (!lex.canRetrieve() && lex.getType() == "EOF")
+		{
+			break;
+		}
+		if (lex.getVal() == end)
 		{
 			break;
 		}
@@ -150,6 +180,7 @@ json parseArgs(LexList& lex, string sep, string end)
 		else if (lex.getType() == "NUM" || lex.getType() == "DOT")
 		{
 			n["children"] += parseNum(lex);
+			continue;
 		}
 		else if (lex.getType() == "ID")
 		{
@@ -163,7 +194,6 @@ json parseArgs(LexList& lex, string sep, string end)
 
 json parseNum(LexList& lex)
 {
-	json n = node("num");
 	bool dotted = 0;
 	string num;
 	while (lex.canRetrieve() || !lex.eof())
@@ -187,20 +217,20 @@ json parseNum(LexList& lex)
 		}
 		lex.stepUp();
 	}
+
+	json n = node("int");
 	if (dotted)
 	{
-		float i;
-		stringstream ab(num);
-		ab >> i;
-		return i;
+		n[NN] = "float";
+		n["value"] = string(num,1);
 	}
 	else
 	{
-		int i;
-		stringstream ab(num);
-		ab >> i;
-		return i;
+		n["value"] = string(num,1);
+		
 	}
+
+	return n;
 }
 
 json parseIf(LexList& lex)
@@ -266,27 +296,44 @@ json parseFunction(LexList& lex)
 
 	lex.stepUp();
 
-	bool gotName = 0;
-	string name = ""; // name of function
+	bool gotName = 0, gotArgs = 0, gotType = 0, gettingType = 0;
+	string name = "", type; // name of function
 
 	while (lex.canRetrieve() && !lex.eof())
 	{
 		lex.skipSpace();
-		if (lex.getVal() == "{")
+		if (lex.getVal() == "@")
 		{
 			gotName = true;
+			gettingType = 1;
+			lex.stepUp();
+			continue;
 		}
 
 		if (!gotName)
 		{
 			name += lex.getVal();
 		}
-		else
+
+		if (gettingType && !gotType && lex.getType() == "ID")
+		{
+			type += lex.getVal();
+			gotType = 1;
+			lex.stepUp();
+			continue;
+		}
+		if (gotArgs)
 		{
 			n["children"] += parse(lex,name,"}");
 			break;
 		}
+		else if (gotType && gotName)
+		{
+			gotArgs = true;
+			n["args"] = parseArgs(lex, ",", "{");
+		}
 		lex.stepUp();
 	}
+	n["type"] = type;
 	return n;
 }

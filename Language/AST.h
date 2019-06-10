@@ -18,6 +18,8 @@ json parseNum(LexList& lex);
 
 json parseIf(LexList& lex);
 
+json parseReturn(LexList& lex);
+
 json parseFunction(LexList& lex);
 
 json parseVarDec(LexList& lex); // parse variable declaration

@@ -1,0 +1,14 @@
+<errors>
+  <error code="001">
+    Input file does not end with a .STARP file name.
+    <fix>
+      Rename input file to have a .STARP file extension.
+    </fix>
+  </error>
+  <error code="002">
+    Output file is unable to be opened.
+    <fix>
+      Make the output file able to be opened.
+    </fix>
+  </error>
+</errors>
